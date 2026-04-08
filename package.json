@@ -1,0 +1,10 @@
+{
+  "name": "hhc-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/audace-kwizera/hhcPrajectApp__Backend.git",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
