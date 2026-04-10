@@ -1,1 +1,5 @@
 .env
+.backendStructure
+.env.local
+test.js
+.modulesStructure
