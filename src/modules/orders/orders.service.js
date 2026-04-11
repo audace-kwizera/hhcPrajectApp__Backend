@@ -7,8 +7,8 @@ const createOrder = async (data) => {
     salon_id,
     appointment_id,
     items,
-    payment_method, // ancien
-    payments // nouveau
+    payment_method,
+    payments
   } = data;
 
   if (!client_id || !salon_id || !items || items.length === 0) {
@@ -22,7 +22,7 @@ const createOrder = async (data) => {
 
   let finalPaymentMethod = payment_method || "UNKNOWN";
 
-  // 🔥 NEW SYSTEM (MIXED)
+  // 🔥 MIXED PAYMENT
   if (payments && payments.length > 0) {
     const totalPaid = payments.reduce((sum, p) => {
       return sum + Number(p.amount);
@@ -32,7 +32,8 @@ const createOrder = async (data) => {
       throw new Error("Payment total does not match order total");
     }
 
-    finalPaymentMethod = payments.length > 1 ? "MIXED" : payments[0].method;
+    finalPaymentMethod =
+      payments.length > 1 ? "MIXED" : payments[0].method;
   }
 
   // 🔥 CREATE ORDER
@@ -46,7 +47,7 @@ const createOrder = async (data) => {
 
   const order = orderResult.rows[0];
 
-  // 🔥 INSERT ITEMS
+  // 🔥 INSERT ITEMS + STOCK
   for (const item of items) {
     await pool.query(
       `INSERT INTO order_items 
@@ -60,9 +61,41 @@ const createOrder = async (data) => {
         item.quantity || 1
       ]
     );
+
+    // =========================
+    // 🔥 STOCK MANAGEMENT
+    // =========================
+    if (item.type === "PRODUCT" && item.product_id) {
+      const qty = item.quantity || 1;
+
+      // 🔥 CHECK STOCK EXIST
+      const stock = await pool.query(
+        `SELECT quantity FROM inventory 
+         WHERE product_id=$1 AND salon_id=$2`,
+        [item.product_id, salon_id]
+      );
+
+      if (stock.rows.length === 0) {
+        throw new Error(`Produit ${item.name} non trouvé en stock`);
+      }
+
+      // 🔥 CHECK QUANTITY
+      if (stock.rows[0].quantity < qty) {
+        throw new Error(`Stock insuffisant pour ${item.name}`);
+      }
+
+      // 🔥 UPDATE STOCK
+      await pool.query(
+        `UPDATE inventory 
+         SET quantity = quantity - $1,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE product_id=$2 AND salon_id=$3`,
+        [qty, item.product_id, salon_id]
+      );
+    }
   }
 
-  // 🔥 INSERT PAYMENTS (NEW)
+  // 🔥 INSERT PAYMENTS
   if (payments && payments.length > 0) {
     for (const payment of payments) {
       await pool.query(
@@ -71,10 +104,7 @@ const createOrder = async (data) => {
         [order.id, payment.method, payment.amount]
       );
     }
-  }
-
-  // 🔥 FALLBACK (ancien système → 1 paiement)
-  else if (payment_method) {
+  } else if (payment_method) {
     await pool.query(
       `INSERT INTO payments (order_id, method, amount)
        VALUES ($1,$2,$3)`,
