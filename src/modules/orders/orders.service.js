@@ -7,7 +7,8 @@ const createOrder = async (data) => {
     salon_id,
     appointment_id,
     items,
-    payment_method
+    payment_method, // ancien
+    payments // nouveau
   } = data;
 
   if (!client_id || !salon_id || !items || items.length === 0) {
@@ -19,13 +20,28 @@ const createOrder = async (data) => {
     return sum + Number(item.price) * (item.quantity || 1);
   }, 0);
 
+  let finalPaymentMethod = payment_method || "UNKNOWN";
+
+  // 🔥 NEW SYSTEM (MIXED)
+  if (payments && payments.length > 0) {
+    const totalPaid = payments.reduce((sum, p) => {
+      return sum + Number(p.amount);
+    }, 0);
+
+    if (totalPaid !== total) {
+      throw new Error("Payment total does not match order total");
+    }
+
+    finalPaymentMethod = payments.length > 1 ? "MIXED" : payments[0].method;
+  }
+
   // 🔥 CREATE ORDER
   const orderResult = await pool.query(
     `INSERT INTO orders 
     (client_id, salon_id, appointment_id, total, payment_method)
     VALUES ($1,$2,$3,$4,$5)
     RETURNING *`,
-    [client_id, salon_id, appointment_id || null, total, payment_method]
+    [client_id, salon_id, appointment_id || null, total, finalPaymentMethod]
   );
 
   const order = orderResult.rows[0];
@@ -46,7 +62,27 @@ const createOrder = async (data) => {
     );
   }
 
-  // 🔥 UPDATE APPOINTMENT → DONE (SAFE)
+  // 🔥 INSERT PAYMENTS (NEW)
+  if (payments && payments.length > 0) {
+    for (const payment of payments) {
+      await pool.query(
+        `INSERT INTO payments (order_id, method, amount)
+         VALUES ($1,$2,$3)`,
+        [order.id, payment.method, payment.amount]
+      );
+    }
+  }
+
+  // 🔥 FALLBACK (ancien système → 1 paiement)
+  else if (payment_method) {
+    await pool.query(
+      `INSERT INTO payments (order_id, method, amount)
+       VALUES ($1,$2,$3)`,
+      [order.id, payment_method, total]
+    );
+  }
+
+  // 🔥 UPDATE APPOINTMENT
   if (appointment_id) {
     try {
       await pool.query(
