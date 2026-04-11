@@ -35,4 +35,14 @@ router.get("/", auth, async (req, res) => {
   res.json(data);
 });
 
+router.put("/:id/status", auth, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const data = await service.updateStatus(req.params.id, status);
+    res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 module.exports = router;
