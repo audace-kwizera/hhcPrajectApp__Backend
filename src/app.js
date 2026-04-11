@@ -21,6 +21,10 @@ const employeeRoutes = require("./modules/employees/employees.routes");
 /// Orders
 const orderRoutes = require("./modules/orders/orders.routes");
 
+/// Inventory & Stock
+const inventoryRoutes = require("./modules/inventory/inventory.routes");
+const transferRoutes = require("./modules/transfers/transfers.routes");
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
@@ -39,6 +43,11 @@ app.use("/api/employees", employeeRoutes);
 
 /// Orders
 app.use("/api/orders", orderRoutes);
+
+/// Inventory & Stock
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/transfers", transferRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");
