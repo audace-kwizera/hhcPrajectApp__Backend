@@ -46,7 +46,21 @@ const createOrder = async (data) => {
     );
   }
 
-  // 🔥 LOYALTY (ex: 1€ = 1 point)
+  // 🔥 UPDATE APPOINTMENT → DONE (SAFE)
+  if (appointment_id) {
+    try {
+      await pool.query(
+        `UPDATE appointments 
+         SET status = 'DONE' 
+         WHERE id = $1`,
+        [appointment_id]
+      );
+    } catch (err) {
+      console.error("Appointment update error:", err.message);
+    }
+  }
+
+  // 🔥 LOYALTY
   try {
     await loyaltyService.addPoints(client_id, Math.floor(total));
   } catch (err) {
