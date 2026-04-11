@@ -18,6 +18,9 @@ const loyaltyRoutes = require("./modules/loyalty/loyalty.routes");
 /// Employees
 const employeeRoutes = require("./modules/employees/employees.routes");
 
+/// Orders
+const orderRoutes = require("./modules/orders/orders.routes");
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
@@ -33,6 +36,9 @@ app.use("/api/loyalty", loyaltyRoutes);
 
 /// Employees
 app.use("/api/employees", employeeRoutes);
+
+/// Orders
+app.use("/api/orders", orderRoutes);
 
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");
