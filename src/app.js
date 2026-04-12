@@ -25,6 +25,9 @@ const orderRoutes = require("./modules/orders/orders.routes");
 const inventoryRoutes = require("./modules/inventory/inventory.routes");
 const transferRoutes = require("./modules/transfers/transfers.routes");
 
+/// Dashboard
+const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
@@ -48,6 +51,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/transfers", transferRoutes);
 
+/// Dashboard
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");
