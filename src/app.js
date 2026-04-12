@@ -28,6 +28,9 @@ const transferRoutes = require("./modules/transfers/transfers.routes");
 /// Dashboard
 const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 
+/// Client
+const selfieRoutes = require("./modules/selfie/selfie.routes");
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
@@ -53,6 +56,9 @@ app.use("/api/transfers", transferRoutes);
 
 /// Dashboard
 app.use("/api/dashboard", dashboardRoutes);
+
+/// Client
+app.use("/api/selfie", selfieRoutes);
 
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");
