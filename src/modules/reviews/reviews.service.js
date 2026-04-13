@@ -62,8 +62,129 @@ const getSalonRating = async (salon_id) => {
   return result.rows[0];
 };
 
+// 🔥 ADD REPLY
+const addReply = async (data) => {
+  const { review_id, salon_id, reply } = data;
+
+  if (!review_id || !salon_id || !reply) {
+    throw new Error("Missing fields");
+  }
+
+  // 🔥 CHECK REVIEW
+  const review = await pool.query(
+    "SELECT * FROM reviews WHERE id=$1",
+    [review_id]
+  );
+
+  if (review.rows.length === 0) {
+    throw new Error("Review not found");
+  }
+
+  // 🔥 CHECK SALON MATCH
+  if (review.rows[0].salon_id !== salon_id) {
+    throw new Error("Unauthorized");
+  }
+
+  const result = await pool.query(
+    `INSERT INTO review_replies (review_id, salon_id, reply)
+     VALUES ($1,$2,$3)
+     RETURNING *`,
+    [review_id, salon_id, reply]
+  );
+
+  return result.rows[0];
+};
+
+// 🔥 GET REVIEWS WITH REPLIES
+const getSalonReviewsWithReplies = async (salon_id) => {
+  const result = await pool.query(
+    `SELECT 
+      r.*,
+      u.email,
+      rr.reply,
+      rr.created_at AS reply_created_at
+
+     FROM reviews r
+
+     JOIN users u ON u.id = r.user_id
+
+     LEFT JOIN review_replies rr 
+     ON rr.review_id = r.id
+
+     WHERE r.salon_id = $1
+
+     ORDER BY r.created_at DESC`,
+    [salon_id]
+  );
+
+  return result.rows;
+};
+
+// 🔥 FLAG REVIEW
+const flagReview = async (review_id) => {
+  const result = await pool.query(
+    `UPDATE reviews 
+     SET is_flagged = true
+     WHERE id = $1
+     RETURNING *`,
+    [review_id]
+  );
+
+  return result.rows[0];
+};
+
+// 🔥 ADMIN → GET FLAGGED
+const getFlaggedReviews = async () => {
+  const result = await pool.query(
+    `SELECT 
+      r.*,
+      u.email,
+      s.name as salon_name
+     FROM reviews r
+     JOIN users u ON u.id = r.user_id
+     JOIN salons s ON s.id = r.salon_id
+     WHERE r.is_flagged = true
+     ORDER BY r.created_at DESC`
+  );
+
+  return result.rows;
+};
+
+// 🔥 ADMIN → HIDE
+const hideReview = async (review_id) => {
+  const result = await pool.query(
+    `UPDATE reviews 
+     SET status = 'HIDDEN'
+     WHERE id = $1
+     RETURNING *`,
+    [review_id]
+  );
+
+  return result.rows[0];
+};
+
+// 🔥 ADMIN → RESTORE
+const restoreReview = async (review_id) => {
+  const result = await pool.query(
+    `UPDATE reviews 
+     SET status = 'VISIBLE',
+         is_flagged = false
+     WHERE id = $1
+     RETURNING *`,
+    [review_id]
+  );
+
+  return result.rows[0];
+};
+
 module.exports = {
   createReview,
   getSalonReviews,
-  getSalonRating
+  getSalonRating,
+  addReply,
+  getSalonReviewsWithReplies,
+  flagReview,
+  getFlaggedReviews,
+  hideReview,
+  restoreReview
 };
