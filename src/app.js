@@ -30,6 +30,7 @@ const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 
 /// Client
 const selfieRoutes = require("./modules/selfie/selfie.routes");
+const reviewRoutes = require("./modules/reviews/reviews.routes");
 
 app.use(cors());
 app.use(helmet());
@@ -59,6 +60,7 @@ app.use("/api/dashboard", dashboardRoutes);
 
 /// Client
 app.use("/api/selfie", selfieRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");

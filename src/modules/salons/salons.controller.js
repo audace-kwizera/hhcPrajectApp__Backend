@@ -14,4 +14,16 @@ const getSalons = async (req, res) => {
   res.json(salons);
 };
 
-module.exports = { createSalon, getSalons };
+const getRankedSalons = async (req, res) => {
+  try {
+    const { city } = req.query;
+
+    const salons = await service.getRankedSalons(city);
+
+    res.json(salons);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { createSalon, getSalons, getRankedSalons };
