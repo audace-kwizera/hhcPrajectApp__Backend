@@ -1,8 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("./salons.controller");
+const auth = require("../../middlewares/auth.middleware");
+const checkRole = require("../../middlewares/role.middleware");
 
-router.post("/", controller.createSalon);
+// 🔥 CREATE SALON → ADMIN ou SALON
+router.post("/", auth, checkRole("ADMIN", "SALON"), controller.createSalon);
+
+// 🔥 PUBLIC
 router.get("/", controller.getSalons);
 router.get("/ranking", controller.getRankedSalons);
 
