@@ -4,8 +4,8 @@ const controller = require("./salons.controller");
 const auth = require("../../middlewares/auth.middleware");
 const checkRole = require("../../middlewares/role.middleware");
 
-// 🔥 CREATE SALON → ADMIN ou SALON
-router.post("/", auth, checkRole("ADMIN", "SALON"), controller.createSalon);
+// 🔥 CREATE SALON → ADMIN 
+router.post("/", auth, checkRole("ADMIN"), controller.createSalon);
 
 // 🔥 PUBLIC
 router.get("/", controller.getSalons);
