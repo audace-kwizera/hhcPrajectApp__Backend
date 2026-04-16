@@ -1,17 +1,25 @@
 const pool = require("../../config/db");
 const loyaltyService = require("../loyalty/loyalty.service");
 
-const createOrder = async (data) => {
+const createOrder = async (data, tenant) => {
   const {
     client_id,
-    salon_id,
     appointment_id,
     items,
     payment_method,
     payments
   } = data;
 
-  if (!client_id || !salon_id || !items || items.length === 0) {
+  // 🔐 salon sécurisé depuis JWT
+  const salon_id = tenant.salon_id;
+
+  if (!tenant.isAdmin && !salon_id) {
+    throw new Error("No salon context");
+  }
+
+
+  // 🔥 VALIDATION
+  if (!client_id || !items || items.length === 0) {
     throw new Error("Missing required fields");
   }
 
@@ -136,9 +144,22 @@ const createOrder = async (data) => {
   return order;
 };
 
-const getOrders = async () => {
-  const result = await pool.query("SELECT * FROM orders");
+// 🔥 GET ORDERS (MULTI-TENANT)
+const getOrders = async (tenant) => {
+  // 🔥 ADMIN → accès global
+  if (tenant.isAdmin) {
+    const result = await pool.query("SELECT * FROM orders");
+    return result.rows;
+  }
+
+  // 🔥 sinon filtré par salon
+  const result = await pool.query(
+    "SELECT * FROM orders WHERE salon_id = $1",
+    [tenant.salon_id]
+  );
+
   return result.rows;
 };
+
 
 module.exports = { createOrder, getOrders };

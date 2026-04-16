@@ -66,7 +66,7 @@ const login = async (data) => {
   }
 
   const token = jwt.sign(
-    { id: user.id, role: user.role },
+    { id: user.id, role: user.role, salon_id: user.salon_id || null },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
