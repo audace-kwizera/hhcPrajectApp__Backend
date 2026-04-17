@@ -2,7 +2,7 @@ const service = require("./reviews.service");
 
 const createReview = async (req, res) => {
   try {
-    const data = await service.createReview(req.body);
+    const data = await service.createReview(req.body, req.user);
     res.json(data);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -21,7 +21,7 @@ const getSalonRating = async (req, res) => {
 
 const addReply = async (req, res) => {
   try {
-    const data = await service.addReply(req.body);
+    const data = await service.addReply(req.body, req.tenant);
     res.json(data);
   } catch (err) {
     res.status(400).json({ error: err.message });
