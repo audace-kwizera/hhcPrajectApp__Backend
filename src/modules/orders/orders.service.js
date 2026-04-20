@@ -24,9 +24,33 @@ const createOrder = async (data, tenant) => {
   }
 
   // 🔥 CALCUL TOTAL
+  // =====================================
+  // 🔥 CALCUL TOTAL
+  // =====================================
   const total = items.reduce((sum, item) => {
     return sum + Number(item.price) * (item.quantity || 1);
   }, 0);
+
+  // =====================================
+  // 🔥 COMMISSION SYSTEM
+  // =====================================
+
+  // GET SALON COMMISSION RATE
+  const salonData = await pool.query(
+    "SELECT commission_rate FROM salons WHERE id=$1",
+    [salon_id]
+  );
+
+  const commissionRate =
+    salonData.rows[0]?.commission_rate || 10;
+
+  // CALCUL
+  const commissionAmount = Number(
+    ((total * commissionRate) / 100).toFixed(2)
+  );
+  const salonEarning = Number(
+    (total - commissionAmount).toFixed(2)
+  );
 
   let finalPaymentMethod = payment_method || "UNKNOWN";
 
@@ -47,10 +71,11 @@ const createOrder = async (data, tenant) => {
   // 🔥 CREATE ORDER
   const orderResult = await pool.query(
     `INSERT INTO orders 
-    (client_id, salon_id, appointment_id, total, payment_method)
-    VALUES ($1,$2,$3,$4,$5)
+    (client_id, salon_id, appointment_id, total, payment_method, commission_amount, salon_earning)
+    VALUES ($1,$2,$3,$4,$5,$6,$7)
     RETURNING *`,
-    [client_id, salon_id, appointment_id || null, total, finalPaymentMethod]
+    [client_id, salon_id, appointment_id || null, total, finalPaymentMethod, commissionAmount,
+      salonEarning]
   );
 
   const order = orderResult.rows[0];
