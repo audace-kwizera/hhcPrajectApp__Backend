@@ -53,6 +53,7 @@ const financeRoutes = require("./modules/finance/finance.routes");
 
 /// Partners
 const partnerRoutes = require("./modules/partner/partner.routes");
+const analyticsRoutes = require("./modules/partner/partner.analytics.routes");
 
 app.use(cors());
 app.use(helmet());
@@ -89,6 +90,8 @@ app.use("/api/finance", financeRoutes);
 
 /// Partners
 app.use("/api/partner", partnerRoutes);
+app.use("/api/partner", analyticsRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");
