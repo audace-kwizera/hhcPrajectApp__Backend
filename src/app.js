@@ -95,6 +95,8 @@ app.use("/api/partner", partnerRoutes);
 app.use("/api/partner", analyticsRoutes);
 app.use("/api/partner", employeeAnalyticsRoutes);
 
+/// IA 
+app.use("/api/insights", require("./modules/insights/insights.routes"));
 
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");

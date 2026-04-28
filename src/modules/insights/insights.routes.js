@@ -1,0 +1,25 @@
+const express = require("express");
+const router = express.Router();
+const service = require("./insights.service");
+
+const auth = require("../../middlewares/auth.middleware");
+const tenant = require("../../middlewares/tenant.middleware");
+const role = require("../../middlewares/role.middleware");
+
+// 🔥 SALON / PARTNER / ADMIN
+router.get(
+  "/",
+  auth,
+  tenant,
+  role("ADMIN", "PARTNER", "EMPLOYEE"),
+  async (req, res) => {
+    try {
+      const data = await service.getInsights(req.tenant.salon_id);
+      res.json(data);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+module.exports = router;
