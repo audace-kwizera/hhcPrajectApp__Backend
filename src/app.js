@@ -54,6 +54,8 @@ const financeRoutes = require("./modules/finance/finance.routes");
 /// Partners
 const partnerRoutes = require("./modules/partner/partner.routes");
 const analyticsRoutes = require("./modules/partner/partner.analytics.routes");
+const employeeAnalyticsRoutes = require("./modules/employees/employee.analytics.routes");
+
 
 app.use(cors());
 app.use(helmet());
@@ -91,6 +93,7 @@ app.use("/api/finance", financeRoutes);
 /// Partners
 app.use("/api/partner", partnerRoutes);
 app.use("/api/partner", analyticsRoutes);
+app.use("/api/partner", employeeAnalyticsRoutes);
 
 
 app.get("/", (req, res) => {
