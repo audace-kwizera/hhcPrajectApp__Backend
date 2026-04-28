@@ -51,6 +51,9 @@ cron.schedule("0 0 1 * *", async () => {
 /// Finances
 const financeRoutes = require("./modules/finance/finance.routes");
 
+/// Partners
+const partnerRoutes = require("./modules/partner/partner.routes");
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
@@ -83,6 +86,9 @@ app.use("/api/reviews", reviewRoutes);
 
 /// Finances
 app.use("/api/finance", financeRoutes);
+
+/// Partners
+app.use("/api/partner", partnerRoutes);
 
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");
