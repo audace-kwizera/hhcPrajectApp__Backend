@@ -32,6 +32,25 @@ const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 const selfieRoutes = require("./modules/selfie/selfie.routes");
 const reviewRoutes = require("./modules/reviews/reviews.routes");
 
+/// Automatisation
+const cron = require("node-cron");
+const payoutAutomation = require("./modules/payouts/payouts.automation");
+
+// 🔥 tous les 1er du mois à minuit
+cron.schedule("0 0 1 * *", async () => {
+  console.log("🔥 Running monthly payouts...");
+
+  try {
+    const result = await payoutAutomation.generateMonthlyPayouts();
+    console.log("✅ Payouts created:", result.length);
+  } catch (err) {
+    console.error("❌ Payout cron error:", err.message);
+  }
+});
+
+/// Finances
+const financeRoutes = require("./modules/finance/finance.routes");
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
@@ -62,8 +81,12 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/selfie", selfieRoutes);
 app.use("/api/reviews", reviewRoutes);
 
+/// Finances
+app.use("/api/finance", financeRoutes);
+
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");
 });
+
 
 module.exports = app;

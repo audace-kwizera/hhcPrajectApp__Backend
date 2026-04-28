@@ -6,6 +6,8 @@ const auth = require("../../middlewares/auth.middleware");
 const role = require("../../middlewares/role.middleware");
 const tenant = require("../../middlewares/tenant.middleware");
 
+const automation = require("./payouts.automation");
+
 
 // 🔥 SALON → voir combien il doit recevoir
 router.get(
@@ -56,6 +58,21 @@ router.get(
   async (req, res) => {
     const data = await service.getPayouts();
     res.json(data);
+  }
+);
+
+// 🔥 ADMIN → GENERATE PAYOUTS
+router.post(
+  "/generate",
+  auth,
+  role("ADMIN"),
+  async (req, res) => {
+    try {
+      const data = await automation.generateMonthlyPayouts();
+      res.json(data);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
   }
 );
 
