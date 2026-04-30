@@ -98,6 +98,9 @@ app.use("/api/partner", employeeAnalyticsRoutes);
 /// IA 
 app.use("/api/insights", require("./modules/insights/insights.routes"));
 
+/// Dashboard
+app.use("/api/salon/dashboard", require("./modules/salonDashboard/salonDashboard.routes"));
+
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");
 });
