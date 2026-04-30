@@ -12,7 +12,7 @@ router.get(
   "/employees",
   auth,
   tenant,
-  role("EMPLOYEE", "PARTNER"),
+  role("ADMIN", "EMPLOYEE", "PARTNER"),
   async (req, res) => {
     const salon_id = req.tenant.salon_id;
 

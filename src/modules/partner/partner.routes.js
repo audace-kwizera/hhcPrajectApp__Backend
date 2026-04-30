@@ -12,7 +12,7 @@ router.get(
   "/dashboard",
   auth,
   tenant,
-  role("EMPLOYEE", "PARTNER"),
+  role("ADMIN", "EMPLOYEE", "PARTNER"),
   async (req, res) => {
     const data = await service.getPartnerDashboard(
       req.tenant.salon_id

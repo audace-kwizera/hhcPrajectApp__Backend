@@ -14,7 +14,7 @@ router.get(
   "/due",
   auth,
   tenant,
-  role("EMPLOYEE", "PARTNER"),
+  role("ADMIN", "EMPLOYEE", "PARTNER"),
   async (req, res) => {
     const data = await service.getSalonDue(req.tenant.salon_id);
     res.json(data);

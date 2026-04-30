@@ -166,6 +166,22 @@ const createOrder = async (data, tenant) => {
     console.error("Loyalty error:", err.message);
   }
 
+  // =====================================
+  // 🔴 REALTIME DASHBOARD UPDATE
+  // =====================================
+  try {
+    if (global.io) {
+      global.io.to(`salon_${salon_id}`).emit("dashboard_update", {
+        type: "NEW_ORDER",
+        order_id: order.id,
+        amount: total
+      });
+    }
+  } catch (err) {
+    console.error("Socket error:", err.message);
+  }
+
+
   return order;
 };
 

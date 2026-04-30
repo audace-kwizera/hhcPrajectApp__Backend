@@ -11,7 +11,7 @@ router.get(
   "/",
   auth,
   tenant,
-  role("EMPLOYEE", "PARTNER"),
+  role("ADMIN", "EMPLOYEE", "PARTNER"),
   async (req, res) => {
     try {
       const data = await service.getSalonDashboard(req.tenant.salon_id);

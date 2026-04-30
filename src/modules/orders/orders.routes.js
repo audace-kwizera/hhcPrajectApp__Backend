@@ -10,7 +10,7 @@ const tenant = require("../../middlewares/tenant.middleware");
 router.post(
   "/",
   auth,
-  checkRole("EMPLOYEE", "PARTNER"),
+  checkRole("ADMIN", "EMPLOYEE", "PARTNER"),
   tenant,
   async (req, res) => {
     try {
