@@ -125,6 +125,16 @@ const createOrder = async (data, tenant) => {
          WHERE product_id=$2 AND salon_id=$3`,
         [qty, item.product_id, salon_id]
       );
+      // 🔥 REALTIME STOCK UPDATE
+      if (global.io) {
+        global.io.to(`salon_${salon_id}`).emit(
+          "stock_updated",
+          {
+            product_id: item.product_id,
+            quantity: stock.rows[0].quantity - qty
+          }
+        );
+      }
     }
   }
 
@@ -166,21 +176,33 @@ const createOrder = async (data, tenant) => {
     console.error("Loyalty error:", err.message);
   }
 
+
   // =====================================
-  // 🔴 REALTIME DASHBOARD UPDATE
+  // 🔴 REALTIME EVENTS
   // =====================================
   try {
     if (global.io) {
-      global.io.to(`salon_${salon_id}`).emit("dashboard_update", {
-        type: "NEW_ORDER",
-        order_id: order.id,
-        amount: total
-      });
+
+      // 🔥 NEW ORDER
+      global.io.to(`salon_${salon_id}`).emit(
+        "order_created",
+        order
+      );
+
+      // 🔥 DASHBOARD UPDATE
+      global.io.to(`salon_${salon_id}`).emit(
+        "dashboard_update",
+        {
+          type: "NEW_ORDER",
+          order_id: order.id,
+          amount: total
+        }
+      );
+
     }
   } catch (err) {
     console.error("Socket error:", err.message);
   }
-
 
   return order;
 };

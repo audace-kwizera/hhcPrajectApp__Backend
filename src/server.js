@@ -24,7 +24,7 @@ io.on("connection", (socket) => {
   console.log("⚡ Client connecté:", socket.id);
 
   // 🔥 rejoindre un salon
-  socket.on("join_salon", (salon_id) => {
+  socket.on("joinSalon", (salon_id) => {
     socket.join(`salon_${salon_id}`);
     console.log(`Client rejoint salon_${salon_id}`);
   });
