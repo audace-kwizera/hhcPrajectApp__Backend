@@ -54,4 +54,37 @@ router.get(
   }
 );
 
+router.get(
+  "/salon/today",
+  auth,
+  tenant,
+  role("ADMIN", "EMPLOYEE", "PARTNER"),
+  async (req, res) => {
+    const data = await service.getTodayStats(req.tenant.salon_id);
+    res.json(data);
+  }
+);
+
+router.get(
+  "/salon/employees",
+  auth,
+  tenant,
+  role("ADMIN", "PARTNER"),
+  async (req, res) => {
+    const data = await service.getEmployeePerformance(req.tenant.salon_id);
+    res.json(data);
+  }
+);
+
+router.get(
+  "/salon/live",
+  auth,
+  tenant,
+  role("ADMIN", "EMPLOYEE", "PARTNER"),
+  async (req, res) => {
+    const data = await service.getLiveOrders(req.tenant.salon_id);
+    res.json(data);
+  }
+);
+
 module.exports = router;

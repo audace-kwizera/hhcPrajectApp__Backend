@@ -173,11 +173,68 @@ const getSalonDashboard = async (tenant) => {
   };
 };
 
+// ======================================
+// 🔥 REALTIME - TODAY KPI SIMPLE
+// ======================================
+const getTodayStats = async (salon_id) => {
+  const result = await pool.query(`
+    SELECT 
+      COUNT(*) as total_orders,
+      COALESCE(SUM(total),0) as revenue,
+      COALESCE(SUM(commission_amount),0) as commission,
+      COALESCE(SUM(salon_earning),0) as net
+    FROM orders
+    WHERE salon_id = $1
+    AND DATE(created_at) = CURRENT_DATE
+  `, [salon_id]);
+
+  return result.rows[0];
+};
+
+// ======================================
+// 🔥 REALTIME - EMPLOYEE PERFORMANCE
+// ======================================
+const getEmployeePerformance = async (salon_id) => {
+  const result = await pool.query(`
+    SELECT 
+      u.id,
+      u."firstName",
+      u."lastName",
+      COUNT(o.id) as total_orders,
+      COALESCE(SUM(o.total),0) as revenue
+    FROM users u
+    LEFT JOIN orders o ON o.employee_id = u.id
+    WHERE u.salon_id = $1
+    GROUP BY u.id
+    ORDER BY revenue DESC
+  `, [salon_id]);
+
+  return result.rows;
+};
+
+// ======================================
+// 🔥 REALTIME - LIVE ORDERS
+// ======================================
+const getLiveOrders = async (salon_id) => {
+  const result = await pool.query(`
+    SELECT *
+    FROM orders
+    WHERE salon_id = $1
+    ORDER BY created_at DESC
+    LIMIT 10
+  `, [salon_id]);
+
+  return result.rows;
+};
+
 module.exports = {
   getGlobalStats,
   getRevenueBySalon,
   getTopClients,
   getLowStockGlobal,
   getRecentOrders,
-  getSalonDashboard 
+  getSalonDashboard,
+  getTodayStats,
+  getEmployeePerformance,
+  getLiveOrders
 };
