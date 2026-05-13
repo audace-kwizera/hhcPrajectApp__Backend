@@ -5,6 +5,9 @@
   "repository": "https://github.com/audace-kwizera/hhcPrajectApp__Backend.git",
   "license": "MIT",
   "dependencies": {
+    "@getbrevo/brevo": "^5.0.4",
+    "@prisma/client": "6.19.1",
+    "@prisma/studio": "^0.511.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
@@ -19,7 +22,9 @@
     "node-cron": "^4.2.1",
     "nodemon": "^3.1.14",
     "pg": "^8.20.0",
-    "socket.io": "^4.8.3"
+    "prisma": "6.19.1",
+    "socket.io": "^4.8.3",
+    "twilio": "^6.0.2"
   },
   "scripts": {
     "dev": "nodemon src/server.js",
