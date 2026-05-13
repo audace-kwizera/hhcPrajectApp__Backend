@@ -4,4 +4,8 @@
 test.js
 .modulesStructure
 
+./prisma
+./node_modules
+
+
 
