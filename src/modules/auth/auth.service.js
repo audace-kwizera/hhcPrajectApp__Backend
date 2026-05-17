@@ -6,9 +6,9 @@ const register = async (data) => {
   const { email, password, role, firstName, lastName } = data;
 
   // 🔥 VALIDATION
-  if (!email || !password || !firstName) {
-    throw new Error("Missing required fields");
-  }
+  // if (!email || !password || !firstName) {
+  //   throw new Error("Missing required fields");
+  // }
 
   // 🔥 EMAIL UNIQUE
   const existingUser = await pool.query(

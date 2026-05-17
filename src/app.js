@@ -55,6 +55,7 @@ const financeRoutes = require("./modules/finance/finance.routes");
 const partnerRoutes = require("./modules/partner/partner.routes");
 const analyticsRoutes = require("./modules/partner/partner.analytics.routes");
 const employeeAnalyticsRoutes = require("./modules/employees/employee.analytics.routes");
+const errorMiddleware = require("./middlewares/error.middleware");
 
 
 app.use(cors());
@@ -104,6 +105,9 @@ app.use("/api/salon/dashboard", require("./modules/salonDashboard/salonDashboard
 app.get("/", (req, res) => {
   res.send("HHC API 🚀");
 });
+
+/// Error
+app.use(errorMiddleware)
 
 
 module.exports = app;
