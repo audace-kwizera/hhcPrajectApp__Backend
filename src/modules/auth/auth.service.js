@@ -1,77 +1,110 @@
-const pool = require("../../config/db");
+const { PrismaClient } = require("@prisma/client");
+
+const prisma = new PrismaClient();
+
 const jwt = require("jsonwebtoken");
-const { hashPassword, comparePassword } = require("../../utils/hash");
+
+const {
+  hashPassword,
+  comparePassword,
+} = require("../../utils/hash");
+
+//////////////////////////////////////////////////////
+//////////////////// REGISTER ////////////////////////
+//////////////////////////////////////////////////////
 
 const register = async (data) => {
-  const { email, password, role, firstName, lastName } = data;
+  const {
+    nom,
+    email,
+    password,
+    role,
+  } = data;
 
-  // 🔥 VALIDATION
-  // if (!email || !password || !firstName) {
-  //   throw new Error("Missing required fields");
-  // }
+  // ✅ CHECK EMAIL
+  const existingEmploye =
+    await prisma.employe.findUnique({
+      where: {
+        email,
+      },
+    });
 
-  // 🔥 EMAIL UNIQUE
-  const existingUser = await pool.query(
-    "SELECT id FROM users WHERE email=$1",
-    [email]
-  );
-
-  if (existingUser.rows.length > 0) {
+  if (existingEmploye) {
     throw new Error("Email already used");
   }
 
-  // 🔥 ROLE SECURE (RBAC SAFE)
-  const allowedRoles = ["USER", "ADMIN", "EMPLOYEE", "PARTNER", "SALON"];
+  // ✅ HASH PASSWORD
+  const hashedPassword =
+    await hashPassword(password);
 
-  const safeRole = allowedRoles.includes(role) ? role : "USER";
+  // ✅ CREATE USER
+  const employe =
+    await prisma.employe.create({
+      data: {
+        nom,
+        email,
+        password: hashedPassword,
+        role,
+      },
+    });
 
-  // 🔥 HASH PASSWORD
-  const hashed = await hashPassword(password);
-
-  // 🔥 INSERT
-  const result = await pool.query(
-    `INSERT INTO users (email, password, role, "firstName", "lastName")
-     VALUES ($1,$2,$3,$4,$5)
-     RETURNING id, email, role, "firstName", "lastName"`,
-    [
-      email,
-      hashed,
-      safeRole, 
-      firstName,
-      lastName || null
-    ]
-  );
-
-  return result.rows[0];
+  return employe;
 };
+
+//////////////////////////////////////////////////////
+//////////////////// LOGIN ///////////////////////////
+//////////////////////////////////////////////////////
 
 const login = async (data) => {
   const { email, password } = data;
 
-  const result = await pool.query(
-    "SELECT * FROM users WHERE email=$1",
-    [email]
-  );
+  // ✅ FIND USER
+  const employe =
+    await prisma.employe.findUnique({
+      where: {
+        email,
+      },
+    });
 
-  if (result.rows.length === 0) {
+  if (!employe) {
     throw new Error("User not found");
   }
 
-  const user = result.rows[0];
+  // ✅ CHECK PASSWORD
+  const validPassword =
+    await comparePassword(
+      password,
+      employe.password
+    );
 
-  const valid = await comparePassword(password, user.password);
-
-  if (!valid) {
+  if (!validPassword) {
     throw new Error("Invalid password");
   }
 
+  // ✅ JWT
   const token = jwt.sign(
-    { id: user.id, role: user.role, salon_id: user.salon_id || null },
+    {
+      id: employe.id,
+      role: employe.role,
+    },
     process.env.JWT_SECRET,
-    { expiresIn: "7d" }
+    {
+      expiresIn: "7d",
+    }
   );
 
-  return { user, token };
+  return {
+    token,
+    user: {
+      id: employe.id,
+      nom: employe.nom,
+      email: employe.email,
+      role: employe.role,
+    },
+  };
 };
 
-module.exports = { register, login };
+module.exports = {
+  register,
+  login,
+};
